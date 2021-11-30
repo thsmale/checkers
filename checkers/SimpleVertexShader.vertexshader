@@ -1,0 +1,22 @@
+#version 330 core
+
+// Input vertex data, different for all executions of this shader.
+// Each vertex can have numerous attributes like colors, or textures
+// This location identifies which vertex we are referring too
+layout(location = 0) in vec2 vertexPosition_modelspace;
+// Notice that the "1" here equals the "1" in glVertexAttribPointer
+layout(location = 1) in vec3 vertexColor;
+
+out vec3 fragmentColor;
+
+void main(){
+
+    gl_Position.xy = vertexPosition_modelspace;
+    gl_Position.z = 0.0; 
+    gl_Position.w = 1.0;
+    
+    // The color of each vertex will be interpolated
+    // to produce the color of each fragment
+    fragmentColor = vertexColor;
+
+}
