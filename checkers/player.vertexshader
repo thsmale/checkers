@@ -1,0 +1,14 @@
+#version 330 core
+
+// Input vertex data, different for all executions of this shader.
+// Each vertex can have numerous attributes like colors, or textures
+// This location identifies which vertex we are referring too
+layout(location = 3) in vec2 player_space;
+
+void main(){
+
+    gl_Position.xy = player_space;
+    gl_Position.z = 0.0; 
+    gl_Position.w = 1.0;
+
+}

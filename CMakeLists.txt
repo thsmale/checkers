@@ -59,6 +59,10 @@ add_executable(checkers
 	checkers/main.cpp
 	checkers/board.cpp
 	checkers/board.hpp
+	checkers/player.hpp
+	checkers/player.cpp
+	checkers/checker.hpp
+	checkers/checker.cpp
 	checkers/window.cpp
 	checkers/window.hpp
 	common/shader.cpp
@@ -66,6 +70,10 @@ add_executable(checkers
 
 	checkers/SimpleFragmentShader.fragmentshader
 	checkers/SimpleVertexShader.vertexshader
+	checkers/player.fragmentshader
+	checkers/player.vertexshader
+	checkers/computer.fragmentshader
+	checkers/computer.vertexshader
 )
 target_link_libraries(checkers
 	${ALL_LIBS}

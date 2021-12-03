@@ -23,7 +23,7 @@ Window::Window() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // We don't want the old OpenGL
     
-    window = glfwCreateWindow( 1024, 768, "Cops Robbers", nullptr, nullptr);
+    window = glfwCreateWindow( 1024, 768, "Checkers", nullptr, nullptr);
     
     if( window == nullptr ){
         fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );

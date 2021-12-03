@@ -3,9 +3,13 @@
 // Input vertex data, different for all executions of this shader.
 // Each vertex can have numerous attributes like colors, or textures
 // This location identifies which vertex we are referring too
+//Board
 layout(location = 0) in vec2 vertexPosition_modelspace;
 // Notice that the "1" here equals the "1" in glVertexAttribPointer
+//Colors
 layout(location = 1) in vec3 vertexColor;
+
+
 
 out vec3 fragmentColor;
 
