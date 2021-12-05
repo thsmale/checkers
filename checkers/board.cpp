@@ -153,7 +153,6 @@ void Board::set_board() {
     GLfloat height = width;
     GLfloat x = -1.0f;
     GLfloat y = 1.0f;
-    
     //Set top triangles
     int i = 0;
     for(int rows = 0; rows < size; rows++) {
@@ -170,7 +169,6 @@ void Board::set_board() {
         x = -1.0f; //Reset x to far left
         y = y-height; //Shift y down
     }
-     
     //Set bottom triangles
     x = -1.0f;
     y = 1.0f;
@@ -228,6 +226,53 @@ int Board::get_board_size() {
 
 int Board::get_colors_size() {
     return colors_size;
+}
+
+int Board::get_square(GLfloat x, GLfloat y) {
+    GLfloat xstart = -1.f, xend = -1.f;
+    GLfloat ycieling = 1.f, yfloor = 1.f;
+    for(int i = 0; i < num_squares(); ++i) {
+        if(i % size == 0) {
+            ycieling = yfloor;
+            yfloor -= width;
+            xstart = -1.f;
+            xend = xstart + width;
+        }
+        if(xstart <= x && x < xend &&  y <= ycieling && y > yfloor) {
+            return i;
+        }
+        xstart = xend;
+        xend += width;
+    }
+    cout << x << " " << y << endl;
+    //cout << xstart << " " << xend << " " << x << " " << ystart << " " << yend << " " << y << endl;
+    exit(1);
+    return -1;
+}
+
+//Based on Mouse coordinates
+//Uses win/width and win_height instead of square_len
+int Board::get_square(double x, double y) {
+    int xpos = int(x);
+    int ypos = int(y);
+    int x_len = WIN_WIDTH/size;
+    int y_len = WIN_HEIGHT/size;
+    int xstart = 0, xend = 0;
+    int ystart = 0, yend = 0;
+    for(int i = 0; i < num_squares(); ++i) {
+        if(i % size == 0) {
+            ystart = yend;
+            yend += y_len;
+            xstart = 0;
+            xend = x_len;
+        }
+        if(xstart <= xpos && xpos < xend && ystart <= ypos && ypos < yend) {
+            return i;
+        }
+        xstart = xend;
+        xend += x_len;
+    }
+    return -1;
 }
 
 int Board::num_vertices() {

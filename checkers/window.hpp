@@ -18,11 +18,14 @@
 // This handles window and keyboard
 #include <GLFW/glfw3.h>
 
+#define WIN_WIDTH 1024
+#define WIN_HEIGHT 768
+
 class Window {
 public:
     Window();
-    ~Window(); 
-    GLFWwindow* get_window(); 
+    ~Window();
+    GLFWwindow* get_window();
 private:
     GLFWwindow* window;
 };

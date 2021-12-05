@@ -19,6 +19,9 @@
 
 using namespace std; 
 
+//Could not for the life of me include Board because of glew.h header file 
+#define WIN_WIDTH 1024
+#define WIN_HEIGHT 768
 
 class Board {
 public:
@@ -42,7 +45,9 @@ public:
     int num_vertices();
     int num_triangles();
     int num_squares();
-    int num_diagonals(); 
+    int num_diagonals();
+    int get_square(GLfloat, GLfloat);
+    int get_square(double, double); 
     //Print functions
     void print_board();
     void print_triangles();

@@ -19,10 +19,13 @@ static const GLfloat pi = 3.14f; //Maybe make this a macro
 
 struct Checker: protected Board {
     Checker();
-    void set_checker(GLfloat, GLfloat); 
+    void set_checker(GLfloat, GLfloat, int); 
     void move_piece(int, int);
+    void color(GLfloat, GLfloat, GLfloat); 
     GLfloat radius; 
     vector<GLfloat> vertices;
+    vector<GLfloat> colors; 
+    int square;
     bool capture;
     bool king;
 };

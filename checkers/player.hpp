@@ -19,9 +19,12 @@
 class Player: public Board {
 public:
     Player(int);
-    void move_checker(int checker, int square);
     void set_checkers();
-    vector<GLfloat> get_checkers();
+    void move_checker(int checker, int square);
+    void select_checker(double, double);
+    void print_checker_squares(); 
+    vector<GLfloat> get_checker_vertices();
+    vector<GLfloat> get_checker_colors();
 private:
     Checker checkers[NUM_CHECKERS];
     int type;
@@ -29,4 +32,5 @@ private:
     GLfloat y;
 };
 
+extern Player human; 
 #endif /* player_hpp */
