@@ -1,5 +1,5 @@
 //
-//  board.cpp
+//  board_vertices.cpp
 //  cops_robbers
 //
 //  Created by Tommy Smale on 11/15/21.
@@ -7,15 +7,18 @@
 
 #include "board.hpp"
 
+vector<vector<char> > Board::board; 
+
 Board::Board() : size(8) {
-    this->board_size = (size*size) * 6 * 2;
+    this->board_vertices_size = (size*size) * 6 * 2;
     this->colors_size = (size*size) * 6 * 3;
-    this->board = new GLfloat[board_size];
+    this->board_vertices = new GLfloat[board_vertices_size];
     this->colors = new GLfloat[colors_size];
     this->width = 1.0 / (size / 2.0);
     GLfloat width = 1.0 / (size / 2.0);
     
-    //Initialize board 
+    /*
+    //Initialize board_vertices 
     GLfloat height = width;
     GLfloat x = -1.0f;
     GLfloat y = 1.0f;
@@ -23,13 +26,13 @@ Board::Board() : size(8) {
     int i = 0;
     for(int rows = 0; rows < size; rows++) {
         for(int cols = 0; cols < size; cols++) {
-            board[i] = x;
-            board[i+1] = y;
+            board_vertices[i] = x;
+            board_vertices[i+1] = y;
             x += width;
-            board[i+2] = x;
-            board[i+3] = y;
-            board[i+4] = x;
-            board[i+5] = y-width;
+            board_vertices[i+2] = x;
+            board_vertices[i+3] = y;
+            board_vertices[i+4] = x;
+            board_vertices[i+5] = y-width;
             i += 6;
         }
         x = -1.0f; //Reset x to far left
@@ -42,15 +45,15 @@ Board::Board() : size(8) {
     for(int rows = 0; rows < size; rows++) {
         for(int cols = 0; cols < size; cols++) {
             //Top left
-            board[i] = x;
-            board[i+1] = y;
+            board_vertices[i] = x;
+            board_vertices[i+1] = y;
             //Bottom left
-            board[i+2] = x;
-            board[i+3] = y-width;
+            board_vertices[i+2] = x;
+            board_vertices[i+3] = y-width;
             //Bottom right
             x += width;
-            board[i+4] = x;
-            board[i+5] = y-width;
+            board_vertices[i+4] = x;
+            board_vertices[i+5] = y-width;
             i += 6;
         }
         x = -1.0f; //Reset x to far left
@@ -61,6 +64,7 @@ Board::Board() : size(8) {
     for(int i = 0; i < colors_size; ++i)
         colors[i] = 0.0f;
     
+     */
     red = 1.0f;
     green = 1.0f;
     blue = 1.0f;
@@ -68,7 +72,7 @@ Board::Board() : size(8) {
 
 //Do I need to delete every element in the array?
 Board::~Board() {
-    delete [] board;
+    delete [] board_vertices;
     delete [] colors;
 }
 
@@ -95,6 +99,9 @@ void Board::color_triangles() {
 
 //Color squares 2 different colors
 void Board::color_squares() {
+    red = 1.0f;
+    green = 1.0f;
+    blue = 1.0f; 
     GLfloat temp = .0f;
     for(int square = 0; square < num_squares(); ++square) {
         if(square % size != 0) {
@@ -142,13 +149,73 @@ bool Board::color_square(int square) {
     return true; 
 }
 
+//Moves uses col, row.
+//I am using row, col so need to convert this
+void Board::color_possible_moves(vector<pair<int, int> > possible_moves) {
+    if(possible_moves[0].first == -1 && possible_moves[1].second == -1)
+        return;
+    set_color(0.f, 1.f, 0.f); 
+    int square = 0;
+    for(int i = 0; i < possible_moves.size(); ++i) {
+        square = get_square(possible_moves[i]);
+        color_square(square);
+    }
+}
 
 //MARK: Setters
+//Even rows odd numbers are checkers
+//Odd rows odd numbers are blanks
+//rows 0-3 are computer, rows (size-3..size) are player
+void Board::set_board() {
+    board.clear();
+    board.resize(size);
+    char piece;
+    //Set computer positions
+    for(int i = 0; i < size; ++i) {
+        for(int j = 0; j < size; ++j) {
+            if(i < 3 || i >= (size-3)) {
+                if (i < 3)
+                    piece = board_properties::computer;
+                else
+                    piece = board_properties::player;
+                if(i % 2 == 0) {
+                    //Even row
+                    if(j % 2 == 0) {
+                        board[i].push_back(board_properties::blank);
+                    }else {
+                        board[i].push_back(piece);
+                    }
+                }else {
+                    //Odd row
+                    if(j % 2 == 0) {
+                        board[i].push_back(piece);
+                    }else {
+                        board[i].push_back(board_properties::blank);
+                    }
+                }
+            }else {
+                board[i].push_back(board_properties::blank);
+            }
+        }
+    }
+    //Set player positions
+}
+
+//true if computer false if human
+void Board::update_board(pair<int, int> cur_coords, pair<int, int> new_coords, bool color) {
+    board[cur_coords.first][cur_coords.second] = board_properties::blank;
+    if(color == true) {
+        board[new_coords.first][new_coords.second] = board_properties::computer;
+    }else {
+        board[new_coords.first][new_coords.second] = board_properties::player;
+    }
+}
+
 //Space is -1, 1 with center being 0, 0
 //Need each triangle to have unique points
 //So it can have it's own attributes
 //Width will be maximumn number of squares we can fit in the space given the size
-void Board::set_board() {
+void Board::set_board_vertices() {
     GLfloat width = 1.0 / (size / 2.0);
     GLfloat height = width;
     GLfloat x = -1.0f;
@@ -157,13 +224,13 @@ void Board::set_board() {
     int i = 0;
     for(int rows = 0; rows < size; rows++) {
         for(int cols = 0; cols < size; cols++) {
-            board[i] = x;
-            board[i+1] = y;
+            board_vertices[i] = x;
+            board_vertices[i+1] = y;
             x += width;
-            board[i+2] = x;
-            board[i+3] = y;
-            board[i+4] = x;
-            board[i+5] = y-width;
+            board_vertices[i+2] = x;
+            board_vertices[i+3] = y;
+            board_vertices[i+4] = x;
+            board_vertices[i+5] = y-width;
             i += 6;
         }
         x = -1.0f; //Reset x to far left
@@ -175,15 +242,15 @@ void Board::set_board() {
     for(int rows = 0; rows < size; rows++) {
         for(int cols = 0; cols < size; cols++) {
             //Top left
-            board[i] = x;
-            board[i+1] = y;
+            board_vertices[i] = x;
+            board_vertices[i+1] = y;
             //Bottom left
-            board[i+2] = x;
-            board[i+3] = y-width;
+            board_vertices[i+2] = x;
+            board_vertices[i+3] = y-width;
             //Bottom right
             x += width;
-            board[i+4] = x;
-            board[i+5] = y-width;
+            board_vertices[i+4] = x;
+            board_vertices[i+5] = y-width;
             i += 6;
         }
         x = -1.0f; //Reset x to far left
@@ -212,16 +279,20 @@ int Board::get_size() {
     return size;
 }
 
-GLfloat* Board::get_board() {
-    return board;
+vector<vector<char> > Board::get_board() {
+    return board; 
+}
+
+GLfloat* Board::get_board_vertices() {
+    return board_vertices;
 }
 
 GLfloat* Board::get_colors() {
     return colors;
 }
 
-int Board::get_board_size() {
-    return board_size;
+int Board::get_board_vertices_size() {
+    return board_vertices_size;
 }
 
 int Board::get_colors_size() {
@@ -275,8 +346,65 @@ int Board::get_square(double x, double y) {
     return -1;
 }
 
+//Moves uses col, row.
+//I am using row, col so need to convert this
+int Board::get_square(std::pair<int, int> coordinates) {
+    int row = coordinates.second * size;
+    int col = coordinates.first;
+    return (row+col); 
+}
+
+//Pass in a square number and this will return the coordinates
+//This is for compatibility with moves.hpp file
+std::pair<int, int> Board::get_coordinates(int square) {
+    if(square < 0 || square > ((size*size)-1)) {
+        return make_pair(-1, -1);
+    }
+    std::pair<int, int> coordinates;
+    int row = int(square / size);
+    int col = square % size;
+    coordinates = make_pair(row, col); 
+    return coordinates;
+}
+
+pair<GLfloat, GLfloat> Board::get_center(int square) {
+    GLfloat center_x = -1.f, center_y = 1.f;
+    for(int i = 0; i < num_squares(); ++i) {
+        if(i % size == 0) {
+            center_x =  -1.f+(width/2.f);
+            center_y -= (width/2.f);
+        }
+        if(i == square) {
+            return make_pair(center_x, center_y);
+        }
+        center_x += (width/2.f);
+    }
+    cerr << "Could not find center of square " << square << endl;
+    exit(1); 
+}
+
+bool Board::valid_move(int square, bool white, bool king) {
+    pair<int, int> coords = get_coordinates(square);
+    vector<pair<int, int> > possible_moves = whereCanPieceMove(board, coords.second, coords.first, white, king);
+    int row = int(square/size);
+    int col = square % size;
+    bool player;
+    if(board[row][col] == board_properties::player) {
+        player = true;
+    }else {
+        player = false;
+    }
+    //White is false if player
+    //Move to square if it is open or take out opponent
+    if(board[row][col] == board_properties::blank || player != white) {
+        cout << "Moving to square " << square << " is valid" << endl;
+        return true;
+    }
+    return false;
+}
+
 int Board::num_vertices() {
-    return board_size/2;
+    return board_vertices_size/2;
 }
 
 int Board::num_triangles() {
@@ -293,19 +421,27 @@ int Board::num_diagonals() {
 
 //MARK: Print functions
 void Board::print_board() {
-    for(int i = 0; i < board_size; ++i) {
+    for(int i = 0; i < board.size(); ++i) {
+        for(int j = 0; j < board[i].size(); ++j) {
+            cout << board[i][j] << " ";
+        }
+        cout << endl; 
+    }
+}
+void Board::print_board_vertices() {
+    for(int i = 0; i < board_vertices_size; ++i) {
         if((i % size) == 0)
             cout << endl;
-        printf("%.2f ", board[i]);
+        printf("%.2f ", board_vertices[i]);
     }
 }
 
 void Board::print_triangles() {
     int i = 0;
-    for(int i = 0; i < board_size; i+=2) {
+    for(int i = 0; i < board_vertices_size; i+=2) {
         if(i % 6 == 0)
             cout << endl;
-        cout << "(" << board[i] << ", " << board[i+1] <<") ";
+        cout << "(" << board_vertices[i] << ", " << board_vertices[i+1] <<") ";
     }
     cout << endl;
 }
@@ -318,14 +454,14 @@ void Board::print_colors() {
     cout << endl; 
 }
 
-void Board::print_board_x_y() {
+void Board::print_board_vertices_x_y() {
     int i = 0;
-    while(i < board_size) {
+    while(i < board_vertices_size) {
         if(i % 18 == 0) cout << endl;
         if(i % 6 == 0) {
             cout << endl;
         }
-        printf("(%.2f, %.2f) ", board[i], board[i+1]);
+        printf("(%.2f, %.2f) ", board_vertices[i], board_vertices[i+1]);
         i += 2;
     }
     cout << endl;

@@ -20,14 +20,15 @@ class Player: public Board {
 public:
     Player(int);
     void set_checkers();
-    void move_checker(int checker, int square);
-    void select_checker(double, double);
+    void select_square(double, double);
     void print_checker_squares(); 
     vector<GLfloat> get_checker_vertices();
     vector<GLfloat> get_checker_colors();
+    int get_selected_checker_square();
 private:
     Checker checkers[NUM_CHECKERS];
     int type;
+    int selected_checker; 
     GLfloat x;
     GLfloat y;
 };
