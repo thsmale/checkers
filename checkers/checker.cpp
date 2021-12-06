@@ -9,7 +9,8 @@
 
 Checker::Checker() {
     radius = width/2;
-    square = 0; 
+    square = 0;
+    capture = false; 
 }
 
 void Checker::set_checker(GLfloat x, GLfloat y, int square) {
@@ -78,4 +79,11 @@ void Checker::color(GLfloat r, GLfloat g, GLfloat b) {
     }
 }
     
+void Checker::eat_checker() {
+    vertices.clear();
+    colors.clear();
+    capture = true;
+    square = -1;
+    king = false; 
+}
     

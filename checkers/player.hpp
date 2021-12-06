@@ -20,6 +20,8 @@ class Player: public Board {
 public:
     Player(int);
     void set_checkers();
+    void update_checkers();
+    void move_checker(); 
     void select_square(double, double);
     void print_checker_squares(); 
     vector<GLfloat> get_checker_vertices();

@@ -22,7 +22,8 @@ struct Checker: protected Board {
     Checker();
     void set_checker(GLfloat, GLfloat, int);
     void move_checker(pair<GLfloat, GLfloat>, int);
-    void color(GLfloat, GLfloat, GLfloat); 
+    void color(GLfloat, GLfloat, GLfloat);
+    void eat_checker(); 
     GLfloat radius; 
     vector<GLfloat> vertices;
     vector<GLfloat> colors; 

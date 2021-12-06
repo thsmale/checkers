@@ -53,7 +53,7 @@ int main() {
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
-    
+
     Board board;
     board.set_board_vertices();
     GLfloat *vertex_buffer_data = board.get_board_vertices();
@@ -97,6 +97,7 @@ int main() {
     vector<vector<char> > board_layout = board.get_board();
     vector<pair<int, int> > possible_moves;
     int cur_x = -1, cur_y = -1;
+     
 
      
     // Create and compile our GLSL program from the shaders
@@ -114,25 +115,33 @@ int main() {
     while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
           glfwWindowShouldClose(window) == 0 ) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        //Highlight selected checker if there is one
         
+
+        //Highlight selected checker if there is one
         player_color_buffer = human.get_checker_colors();
         glBufferData(GL_ARRAY_BUFFER, player_color_buffer.size() * sizeof(player_color_buffer[0]), &player_color_buffer[0], GL_STATIC_DRAW);
 
-        // 1st attribute buffer : vertices
+        // 1st attribute buffer : board_vertices
         glUseProgram(shader);
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         //Layout in shader, dimensions, type, normalized?, stride, offset
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
         
-        // 2nd attribute buffer : colors
+        // 2nd attribute buffer : board_colors
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
         coordinates = board.get_coordinates(human.get_selected_checker_square());
         if((coordinates.first != -1 && coordinates.second != -1) &&
            (coordinates.first != cur_x || coordinates.second != cur_y)) {
+            /*
+            computer.update_checkers();
+            human.update_checkers();
+            cout << "Computer" << endl;
+            computer.print_checker_squares();
+            cout << "Human" << endl; 
             human.print_checker_squares();
+             */
             cur_x = coordinates.first;
             cur_y = coordinates.second;
             //Update selected checker buffer and possible movements
@@ -141,6 +150,7 @@ int main() {
                                                coordinates.second,
                                                coordinates.first,
                                                false, false);
+            printMoves(possible_moves); 
             board.color_squares(); 
             if(possible_moves.size() > 0) {
                 board.color_possible_moves(possible_moves);
@@ -185,7 +195,7 @@ int main() {
         glDrawArrays(GL_TRIANGLES, 0, player_buffer_data.size());
         glDisableVertexAttribArray(3);
         glDisableVertexAttribArray(4);
-
+         
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -194,7 +204,7 @@ int main() {
     // save a screenshot of your awesome OpenGL game engine, running at 1024x768
     int save_result = SOIL_save_screenshot
         (
-            "/Users/tommysmale/classroom/csci580/projects/ogl/checkers/board.bmp",
+            "/Users/tommysmale/classroom/csci580/projects/ogl/checkers/checker.bmp",
             SOIL_SAVE_TYPE_BMP,
             0, 0, 2048, 1536
         );
@@ -204,6 +214,7 @@ int main() {
         cerr << "Save file unsuccessful" << endl;
     }
      */
+     
     
     // Cleanup VBO
     glDeleteBuffers(1, &vbo);

@@ -404,6 +404,17 @@ bool Board::valid_move(int square, bool white, bool king) {
     return false;
 }
 
+//Given a square return which player controls that square
+//0 is computer, 1 is human
+bool Board::player(int square) {
+    pair<int, int> coords = get_coordinates(square);
+    char piece = board[coords.first][coords.second];
+    if(piece == board_properties::computer || piece == board_properties::computer_captial) {
+        return false;
+    }
+    return true;
+}
+
 int Board::num_vertices() {
     return board_vertices_size/2;
 }

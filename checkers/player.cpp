@@ -53,6 +53,41 @@ void Player::set_checkers() {
     cout << endl;
 }
 
+void Player::update_checkers() {
+    vector<vector<char> > board = get_board();
+    int square = 0;
+    bool p;
+    for(int i = 0; i < board.size(); ++i) {
+        for(int j = 0; j < board[i].size(); ++j) {
+            square = get_square(make_pair(i, j));
+            p = player(square);
+            for(int i = 0; i < NUM_CHECKERS; ++i) {
+                if(checkers[i].square == square && p != type) {
+                    checkers[i].eat_checker();
+                }
+            }
+        }
+    }
+}
+
+//This is really for the computer
+//We just enter in coordinates then move piece
+void Player::move_checker() {
+    int square = 0;
+    int piece;
+    int checker = 0;
+    pair<int, int> cur_coordinates = get_coordinates(checker);
+    pair<GLfloat, GLfloat> new_center = get_center(square);
+    for(int i = 0; i < NUM_CHECKERS; ++i) {
+        if (checkers[i].square == square) {
+            checker = i;
+        }
+    }
+    pair<int, int> new_coordinates = get_coordinates(square);
+    checkers[checker].move_checker(new_center, square);
+    update_board(cur_coordinates, new_coordinates, checkers[checker].white);
+}
+
 //Select a checker piece
 //Have selected a checker piece and are selecting a square to move too 
 void Player::select_square(double xpos, double ypos) {
@@ -84,13 +119,9 @@ void Player::select_square(double xpos, double ypos) {
         for(int i = 0; i < possible_moves.size(); ++i) {
             if(new_coordinates.first == possible_moves[i].second && new_coordinates.second == possible_moves[i].first) {
                 pair<GLfloat, GLfloat> new_center = get_center(square);
-                cout << "Move to center " << new_center.first << " " << new_center.second << endl; 
                 checkers[selected_checker].move_checker(new_center, square);
-                print_board();
-                cout << endl; 
                 update_board(cur_coordinates, new_coordinates, checkers[selected_checker].white);
-                print_board();
-                //Must update board too 
+                //Must update board too
                 //selected_checker = -1;
                 break;
             }

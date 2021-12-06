@@ -45,7 +45,7 @@ public:
     void color_possible_moves(vector<pair<int, int> >);
     //Setters
     void set_board();
-    void update_board(pair<int, int>, pair<int, int>, bool);
+    void update_board(pair<int, int>, pair<int, int>, bool player); 
     void set_board_vertices();
     void set_elements();
     void set_color();
@@ -67,6 +67,7 @@ public:
     std::pair<int, int> get_coordinates(int);
     std::pair<GLfloat, GLfloat> get_center(int); 
     bool valid_move(int, bool, bool);
+    bool player(int);
     //Print functions
     void print_board(); 
     void print_board_vertices();
