@@ -43,6 +43,7 @@ void Checker::move_checker(pair<GLfloat, GLfloat> center, int square) {
     GLfloat x = center.first;
     GLfloat y = center.second;
     vertices.clear();
+    colors.clear(); 
     GLfloat radians = 0.f;
     GLfloat prev = 2*pi;
     int triangles = 0;

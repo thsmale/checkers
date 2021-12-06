@@ -116,12 +116,9 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         //Highlight selected checker if there is one
         
-        player_buffer_data = human.get_checker_vertices();
-        glBufferData(GL_ARRAY_BUFFER, player_buffer_data.size() * sizeof(player_buffer_data[0]), &player_buffer_data[0], GL_STATIC_DRAW);
         player_color_buffer = human.get_checker_colors();
         glBufferData(GL_ARRAY_BUFFER, player_color_buffer.size() * sizeof(player_color_buffer[0]), &player_color_buffer[0], GL_STATIC_DRAW);
 
-        
         // 1st attribute buffer : vertices
         glUseProgram(shader);
         glEnableVertexAttribArray(0);
@@ -135,6 +132,7 @@ int main() {
         coordinates = board.get_coordinates(human.get_selected_checker_square());
         if((coordinates.first != -1 && coordinates.second != -1) &&
            (coordinates.first != cur_x || coordinates.second != cur_y)) {
+            human.print_checker_squares();
             cur_x = coordinates.first;
             cur_y = coordinates.second;
             //Update selected checker buffer and possible movements
@@ -173,11 +171,14 @@ int main() {
         glUseProgram(human_shader);
         glEnableVertexAttribArray(3);
         glBindBuffer(GL_ARRAY_BUFFER, player_vbo);
+        player_buffer_data = human.get_checker_vertices();
+        glBufferData(GL_ARRAY_BUFFER, player_buffer_data.size() * sizeof(player_buffer_data[0]), &player_buffer_data[0], GL_STATIC_DRAW);
         glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
         
         //5th attribute buffer : player colors
         glEnableVertexAttribArray(4);
         glBindBuffer(GL_ARRAY_BUFFER, player_color_vbo);
+
         //1st parameter must match the layout in the shader
         //Colors
         glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);

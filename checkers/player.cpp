@@ -134,3 +134,13 @@ void Player::print_checker_squares() {
         cout << checkers[i].square << " ";
     }cout << endl; 
 }
+
+void Player::print_checker_vertices() {
+    for(int i = 0; i < NUM_CHECKERS; ++i) {
+        for(int j = 0; j < checkers[i].vertices.size(); ++j) {
+            if(j % 9 == 0) cout << endl;
+            cout << checkers[i].vertices[j] << " ";
+        }
+        cout << endl;
+    }
+}

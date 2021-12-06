@@ -368,16 +368,17 @@ std::pair<int, int> Board::get_coordinates(int square) {
 }
 
 pair<GLfloat, GLfloat> Board::get_center(int square) {
-    GLfloat center_x = -1.f, center_y = 1.f;
+    cout << "Calc center of square " << square << endl;
+    GLfloat center_x = -1.f+(width/2.f), center_y = 1.f-(width/2.f);
     for(int i = 0; i < num_squares(); ++i) {
-        if(i % size == 0) {
+        if(i % size == 0 && i != 0) {
             center_x =  -1.f+(width/2.f);
-            center_y -= (width/2.f);
+            center_y -= width;
         }
         if(i == square) {
             return make_pair(center_x, center_y);
         }
-        center_x += (width/2.f);
+        center_x += width;
     }
     cerr << "Could not find center of square " << square << endl;
     exit(1); 
@@ -445,6 +446,7 @@ void Board::print_triangles() {
     }
     cout << endl;
 }
+
 void Board::print_colors() {
     for(int i = 0; i < colors_size; ++i) {
         if(i % 3 == 0) cout << endl;

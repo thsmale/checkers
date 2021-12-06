@@ -25,6 +25,7 @@ public:
     vector<GLfloat> get_checker_vertices();
     vector<GLfloat> get_checker_colors();
     int get_selected_checker_square();
+    void print_checker_vertices(); 
 private:
     Checker checkers[NUM_CHECKERS];
     int type;
