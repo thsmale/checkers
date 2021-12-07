@@ -108,7 +108,7 @@ void Board::color_possible_moves(vector<pair<int, int> > possible_moves) {
     set_color(0.f, 1.f, 0.f); 
     int square = 0;
     for(int i = 0; i < possible_moves.size(); ++i) {
-        square = get_square(possible_moves[i]);
+        square = get_square(make_pair(possible_moves[i].second, possible_moves[i].first));
         color_square(square);
     }
 }
@@ -153,12 +153,31 @@ void Board::set_board() {
 }
 
 //true if computer false if human
-void Board::update_board(pair<int, int> cur_coords, pair<int, int> new_coords, bool color) {
+//Set all pieces in path to blank
+//Would need to rely on update_checkers to set to king
+void Board::update_board(pair<int, int> cur_coords, pair<int, int> new_coords, int player) {
+    //Set old and new square
     board[cur_coords.first][cur_coords.second] = board_properties::blank;
-    if(color == true) {
+    if(player == COMPUTER) {
         board[new_coords.first][new_coords.second] = board_properties::computer;
     }else {
         board[new_coords.first][new_coords.second] = board_properties::human_player;
+    }
+    //Set everything in between to blank
+    /*
+    cout << "Update the fucking board holy fuck " << endl;
+    cout << "Coords " << endl;
+    cout << cur_coords.first << " " << cur_coords.second << "\t" << new_coords.first << " " << new_coords.second << endl; 
+    cout << " Squares " << endl;
+    cout << get_square(cur_coords) << " " << get_square(new_coords) <<  endl;
+     */
+    if(get_path_length(get_square(cur_coords), get_square(new_coords)) > 1) {
+        vector<int> path = get_path(get_square(cur_coords), get_square(new_coords));
+        pair<int, int> coords;
+        for(int i = 0; i < path.size()-1; ++i) {
+            coords = get_coordinates(path[i]);
+            board[coords.first][coords.second] = board_properties::blank;
+        }
     }
 }
 
@@ -298,11 +317,10 @@ int Board::get_square(double x, double y) {
     return -1;
 }
 
-//Moves uses col, row.
-//I am using row, col so need to convert this
+//Only accepts row, col coordinates
 int Board::get_square(std::pair<int, int> coordinates) {
-    int row = coordinates.second * size;
-    int col = coordinates.first;
+    int row = coordinates.first * size;
+    int col = coordinates.second;
     return (row+col); 
 }
 
@@ -335,6 +353,59 @@ pair<GLfloat, GLfloat> Board::get_center(int square) {
     exit(1); 
 }
 
+//Given old square and new square this will return the x and y
+//direction at which it moves. All pieces move one at a time.
+//Can move (x, y), (x, -y), (-x, y), (-x, -y)
+//Uses row col indexing where row is y and col is x
+pair<int, int> Board::get_direction(int old_square, int new_square) {
+    //Get x direction
+    int old_col = old_square % size;
+    int new_col = new_square % size;
+    int direction_x = 0;
+    if(old_col < new_col)
+        direction_x = 1;
+    else
+        direction_x = -1;
+    //Get y direction
+    int old_row = int(old_square / size);
+    int new_row = int(new_square / size);
+    int direction_y = 0;
+    if(old_row > new_row) {
+        direction_y = -1;
+    }else {
+        direction_y = 1;
+    }
+    return make_pair(direction_y, direction_x);
+}
+
+int Board::get_path_length(int old_square, int new_square) {
+    int path_length = 0;
+    pair<int, int> directions = get_direction(old_square, new_square);
+    pair<int, int> coords = get_coordinates(old_square);
+    while(old_square != new_square) {
+        coords = get_coordinates(old_square);
+        old_square = get_square(make_pair(coords.first+directions.first, coords.second+directions.second));
+        path_length++;
+    }
+    return path_length;
+}
+
+//Return a path of all squares in path from old square to new_square
+//It's purpose is to clear checkers in this path
+//This only works for diagonal moves.
+//Only call if checker is hoping a checker
+vector<int> Board::get_path(int old_square, int new_square) {
+    vector<int> path;
+    pair<int, int> directions = get_direction(old_square, new_square);
+    pair<int,int> coords;
+    while(old_square != new_square) {
+        coords = get_coordinates(old_square);
+        old_square = get_square(make_pair(coords.first+directions.first, coords.second+directions.second));
+        path.push_back(old_square);
+    }
+    return path;
+}
+
 bool Board::valid_move(int square, bool white, bool king) {
     pair<int, int> coords = get_coordinates(square);
     vector<pair<int, int> > possible_moves = whereCanPieceMove(board, coords.second, coords.first, white, king);
@@ -362,10 +433,10 @@ int Board::player(int square) {
     pair<int, int> coords = get_coordinates(square);
     char piece = board[coords.first][coords.second];
     if(piece == board_properties::computer || piece == board_properties::computer_king) {
-        return 0;
+        return COMPUTER;
     }
     if(piece == board_properties::human_player || piece == board_properties::human_king) {
-        return 1;
+        return HUMAN;
     }
     return -1;
 }
@@ -383,7 +454,7 @@ bool Board::is_king(int square) {
 //0 computer, 1 human
 void Board::mark_king(pair<int, int> coords, int type) {
     char piece;
-    if(type == 0) {
+    if(type == COMPUTER) {
         piece = board_properties::computer_king;
     }else {
         piece = board_properties::human_king;

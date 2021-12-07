@@ -17,7 +17,7 @@
 
 #define NUM_CHECKERS 12
 #define COMPUTER 0
-//#define HUMAN_ID 1
+#define HUMAN 1
 
 class Player: public Board {
 public:
@@ -25,7 +25,6 @@ public:
     void set_checkers();
     void set_turn(); 
     void update_checkers();
-    void move_checker();
     void move_checker(int, int); 
     void select_square(double, double);
     void print_checker_squares(); 

@@ -25,6 +25,8 @@ using namespace std;
 //Could not for the life of me include Board because of glew.h header file 
 #define WIN_WIDTH 1024
 #define WIN_HEIGHT 768
+#define COMPUTER 0 
+#define HUMAN 1
 
 //Must be "human_player" because extern Player human object in board
 enum board_properties : char {
@@ -46,7 +48,7 @@ public:
     void color_possible_moves(vector<pair<int, int> >);
     //Setters
     void set_board();
-    void update_board(pair<int, int>, pair<int, int>, bool player); 
+    void update_board(pair<int, int>, pair<int, int>, int); 
     void set_board_vertices();
     void set_elements();
     void set_color();
@@ -67,6 +69,9 @@ public:
     int get_square(std::pair<int, int>);
     pair<int, int> get_coordinates(int);
     pair<GLfloat, GLfloat> get_center(int);
+    pair<int, int> get_direction(int, int); 
+    int get_path_length(int, int); 
+    vector<int> get_path(int, int); 
     bool valid_move(int, bool, bool);
     int player(int);
     bool is_king(int);

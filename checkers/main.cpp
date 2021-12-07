@@ -44,53 +44,84 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 int main() {
     
+
+    
     Window w;
     GLFWwindow *window = w.get_window();
+    
+    // Create and compile our GLSL program from the shaders
+    GLuint board_shader = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
+    GLuint computer_shader = LoadShaders( "computer.vertexshader", "computer.fragmentshader" );
+    GLuint human_shader = LoadShaders( "player.vertexshader", "player.fragmentshader" );
 
     //Vertex array object
     //Stores links between the vbo and its attributes
     //Does not store vertex data but reference to VBO and how to retrieve the attributes
     //Any vertex buffers or element buffers declared before this will be ignored
+    
+    /*
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
+     */
+    
+    GLuint vao = w.get_vao();
 
     Board board;
     board.set_board_vertices();
     GLfloat *vertex_buffer_data = board.get_board_vertices();
+    w.set_board_vbo(vertex_buffer_data, board.get_board_vertices_size());
+    GLuint board_vbo = w.get_board_vbo();
     // Create a Vertex Buffer Object and copy the vertex data to it
+    
+
+    /*
     GLuint vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, board.get_board_vertices_size() * sizeof(*vertex_buffer_data), vertex_buffer_data, GL_STATIC_DRAW);
-    
+    glBufferData(GL_ARRAY_BUFFER, board.get_board_vertices_size() * sizeof(*vertex_buffer_data), vertex_buffer_data, GL_DYNAMIC_DRAW);
+     */
+     
     board.color_squares();
     GLfloat* color_buffer_data = board.get_colors();
+    w.set_board_colors_vbo(color_buffer_data, board.get_colors_size());
+    GLuint board_colors_vbo = w.get_board_colors_vbo();
+    
+    /*
     GLuint color_buffer;
     glGenBuffers(1, &color_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
-    glBufferData(GL_ARRAY_BUFFER, board.get_colors_size() * sizeof(*color_buffer_data), color_buffer_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, board.get_colors_size() * sizeof(*color_buffer_data), color_buffer_data, GL_DYNAMIC_DRAW);
+     */
     
     Player computer(0);
     computer.set_checkers();
     GLuint computer_vbo;
-    vector<GLfloat> computer_buffer_data = computer.get_checker_vertices();
+    w.set_computer_vbo(computer.get_checker_vertices());
+    /*
     glGenBuffers(1, &computer_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, computer_vbo);
-    glBufferData(GL_ARRAY_BUFFER, computer_buffer_data.size() * sizeof(GLfloat), &computer_buffer_data[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, computer_buffer_data.size() * sizeof(GLfloat), &computer_buffer_data[0], GL_DYNAMIC_DRAW);
+     */
     
     human.set_checkers();
     GLuint player_vbo;
     vector<GLfloat> player_buffer_data = human.get_checker_vertices();
+    w.set_human_vbo(player_buffer_data);
+    /*
     glGenBuffers(1, &player_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, player_vbo);
-    glBufferData(GL_ARRAY_BUFFER, player_buffer_data.size() * sizeof(player_buffer_data[0]), &player_buffer_data[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, player_buffer_data.size() * sizeof(player_buffer_data[0]), &player_buffer_data[0], GL_DYNAMIC_DRAW);
+     */
     
     GLuint player_color_vbo;
     vector<GLfloat> player_color_buffer = human.get_checker_colors();
+    w.set_human_colors_vbo(player_buffer_data);
+    /*
     glGenBuffers(1, &player_color_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, player_color_vbo);
     glBufferData(GL_ARRAY_BUFFER, player_color_buffer.size() * sizeof(player_color_buffer[0]), &player_color_buffer[0], GL_STATIC_DRAW);
+     */
     
     board.set_board();
     pair<int, int> coordinates;
@@ -99,17 +130,13 @@ int main() {
     int cur_x = -1, cur_y = -1;
     ABP Algo;
      
-    // Create and compile our GLSL program from the shaders
-    GLuint shader = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
-    GLuint computer_shader = LoadShaders( "computer.vertexshader", "computer.fragmentshader" );
-    GLuint human_shader = LoadShaders( "player.vertexshader", "player.fragmentshader" );
-    
     // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     
-    
-    
+
+
+
     
     // Check if the ESC key was pressed or the window was closed
     // Closed event loops, only handle events when you need to
@@ -117,19 +144,49 @@ int main() {
           glfwWindowShouldClose(window) == 0 ) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         //Highlight selected checker if there is one
+        /*
         player_color_buffer = human.get_checker_colors();
-        glBufferData(GL_ARRAY_BUFFER, player_color_buffer.size() * sizeof(player_color_buffer[0]), &player_color_buffer[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, player_color_buffer.size() * sizeof(player_color_buffer[0]), &player_color_buffer[0], GL_DYNAMIC_DRAW);
+         */
+        
+        glUseProgram(board_shader);
+        w.draw_board(board);
+        
+        glUseProgram(human_shader);
+        w.draw_human_checkers(human.get_checker_vertices(), human.get_checker_colors());
+    
+        glUseProgram(computer_shader);
+        w.draw_computer_checkers(computer.get_checker_vertices());
 
-        // 1st attribute buffer : board_vertices
+
+        /*
         glUseProgram(shader);
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         //Layout in shader, dimensions, type, normalized?, stride, offset
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-        
         // 2nd attribute buffer : board_colors
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+        //Board color buffer is called if we select a new checker or move checker piece
+        glBufferData(GL_ARRAY_BUFFER, board.get_colors_size() * sizeof(GLfloat), board.get_board_vertices(), GL_DYNAMIC_DRAW);
+        //1st parameter must match the layout in the shader
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+        glDrawArrays(GL_TRIANGLES, 0, board.get_board_vertices_size());
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+        */
+
+        /*
+        // 1st attribute buffer : board_vertices
+        glUseProgram(board_shader);
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, board_vbo);
+        //Layout in shader, dimensions, type, normalized?, stride, offset
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+        // 2nd attribute buffer : board_colors
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, board_colors_vbo);
         //Board color buffer is called if we select a new checker or move checker piece
         coordinates = board.get_coordinates(human.get_selected_checker_square());
         //Need to separate clicking square to see moves and actually moving a piece
@@ -148,24 +205,49 @@ int main() {
             if(possible_moves.size() > 0) {
                 board.color_possible_moves(possible_moves);
             }
-            board.print_board();
             color_buffer_data = board.get_colors();
-            glBufferData(GL_ARRAY_BUFFER, board.get_colors_size() * sizeof(*color_buffer_data), color_buffer_data, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, board.get_colors_size() * sizeof(*color_buffer_data), color_buffer_data, GL_DYNAMIC_DRAW);
         }
-
         //1st parameter must match the layout in the shader
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
         glDrawArrays(GL_TRIANGLES, 0, board.get_board_vertices_size());
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
+         */
+        /*
          
+        // 4th attribute buffer : player
+        human.update_checkers();
+        glUseProgram(human_shader);
+        glEnableVertexAttribArray(3);
+        glBindBuffer(GL_ARRAY_BUFFER, player_vbo);
+        player_buffer_data = human.get_checker_vertices();
+        glBufferData(GL_ARRAY_BUFFER, player_buffer_data.size() * sizeof(player_buffer_data[0]), &player_buffer_data[0], GL_DYNAMIC_DRAW);
+        glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+        
+        //5th attribute buffer : player colors
+        glEnableVertexAttribArray(4);
+        glBindBuffer(GL_ARRAY_BUFFER, player_color_vbo);
+        player_color_buffer = human.get_checker_colors();
+        glBufferData(GL_ARRAY_BUFFER, player_color_buffer.size() * sizeof(player_color_buffer[0]), &player_color_buffer[0], GL_DYNAMIC_DRAW);
+        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+        glDrawArrays(GL_TRIANGLES, 0, player_buffer_data.size());
+        glDisableVertexAttribArray(3);
+        glDisableVertexAttribArray(4);
+        
         // 3rd attribute buffer : computer
+        computer.update_checkers();
         glUseProgram(computer_shader);
         glEnableVertexAttribArray(2);
         glBindBuffer(GL_ARRAY_BUFFER, computer_vbo);
+        computer_buffer_data = computer.get_checker_vertices();
+        glBufferData(GL_ARRAY_BUFFER, computer_buffer_data.size() * sizeof(GLfloat), &computer_buffer_data[0], GL_DYNAMIC_DRAW);
+        //1st parameter must match the layout in the shader
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+        glDrawArrays(GL_TRIANGLES, 0, computer_buffer_data.size());
+        glDisableVertexAttribArray(2);
+         
         if(!human.get_turn()) {
-            computer.update_checkers();
-            board.print_board();
             // Alpha-Beta Pruning min max implementation
             Checker* chosen_checker;
             vector<std::pair<std::pair<int, int>, int> > chosen_moves;
@@ -189,7 +271,7 @@ int main() {
             }
             
             if (chosen_checker != nullptr) { // just in case (for now?)
-                cout << "we have chosen the checker from square " << chosen_checker->square << " to be moved" << endl;
+                //cout << "AI chooses to move checker from square " << chosen_checker->square << endl;
                 std::pair<int, int> optimal_move;
                 int highest = 0;
 
@@ -199,50 +281,13 @@ int main() {
                         optimal_move = move.first;
                     }
                 }
-
-                int old_new_square = board.get_square(optimal_move);
+                int old_new_square = board.get_square(make_pair(optimal_move.second, optimal_move.first));
                 computer.move_checker(chosen_checker->square, old_new_square);
-
-                /*
-                // convert from (col, row) to (row, col)
-                int row = optimal_move.second;
-                optimal_move.second = optimal_move.first;
-                optimal_move.first = row;
-
-                //int new_square = board.get_square(optimal_move); // this is the "converted" square (from (col, row) to (row, col))
-                board.update_board(board.get_coordinates(chosen_checker->square), optimal_move, true);
-
-                chosen_checker->square = old_new_square; // assuming this will need to be replaced so enemy checkers can be taken out
-                 */
-                cout << "checker successfully moved to square " << chosen_checker->square << endl;
+                
             }
-            computer_buffer_data = computer.get_checker_vertices();
-            glBufferData(GL_ARRAY_BUFFER, computer_buffer_data.size() * sizeof(GLfloat), &computer_buffer_data[0], GL_STATIC_DRAW);
             human.set_turn();
         }
-        //1st parameter must match the layout in the shader
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-        glDrawArrays(GL_TRIANGLES, 0, computer_buffer_data.size());
-        glDisableVertexAttribArray(2);
-        
-        // 4th attribute buffer : player
-        glUseProgram(human_shader);
-        glEnableVertexAttribArray(3);
-        glBindBuffer(GL_ARRAY_BUFFER, player_vbo);
-        player_buffer_data = human.get_checker_vertices();
-        glBufferData(GL_ARRAY_BUFFER, player_buffer_data.size() * sizeof(player_buffer_data[0]), &player_buffer_data[0], GL_STATIC_DRAW);
-        glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-        
-        //5th attribute buffer : player colors
-        glEnableVertexAttribArray(4);
-        glBindBuffer(GL_ARRAY_BUFFER, player_color_vbo);
-
-        //1st parameter must match the layout in the shader
-        //Colors
-        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-        glDrawArrays(GL_TRIANGLES, 0, player_buffer_data.size());
-        glDisableVertexAttribArray(3);
-        glDisableVertexAttribArray(4);
+         */
          
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -265,6 +310,7 @@ int main() {
      
     
     // Cleanup VBO
+    /*
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &color_buffer);
     glDeleteBuffers(1, &computer_vbo);
@@ -273,6 +319,7 @@ int main() {
     glDeleteProgram(shader);
     glDeleteProgram(computer_shader);
     glDeleteProgram(human_shader);
+     */
     
     return 0;
 
