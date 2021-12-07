@@ -67,6 +67,10 @@ add_executable(checkers
 	checkers/window.hpp
 	checkers/moves.hpp
 	checkers/moves.cpp
+	checkers/additionalMoves.hpp
+	checkers/additionalMoves.cpp 
+	checkers/movesEvaluated.cpp
+	checkers/movesEvaluated.hpp
 	common/shader.cpp
 	common/shader.hpp
 

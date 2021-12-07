@@ -9,23 +9,24 @@
 
 Player human(1);
 
-//0 is human 1 is computer
 Player::Player(int t) : Board() {
     this->type = t;
-    if(type == 0) {
+    if(type == COMPUTER) {
         //Computer
         x = (width+(width/2))-1;
         y = 1-(width/2);
         for(int i = 0; i < NUM_CHECKERS; ++i) {
             checkers[i].white = true;
         }
-    }else if(type == 1) {
+        this->turn = false; 
+    }else if(type != COMPUTER) {
         //Human
         x = width/2-1;
         y=0-(width+(width/2));
         for(int i = 0; i < NUM_CHECKERS; ++i) {
             checkers[i].white = false;
         }
+        this->turn = true;
     }else {
         cerr << "Invalid player mode" << endl;
         exit(1);
@@ -53,19 +54,43 @@ void Player::set_checkers() {
     cout << endl;
 }
 
+void Player::set_turn() {
+    this->turn = true; 
+}
+
+//Assuming the movements are already updated
+//Need to update
+//  If king
+//  If piece was eaten
 void Player::update_checkers() {
     vector<vector<char> > board = get_board();
     int square = 0;
-    bool p;
-    for(int i = 0; i < board.size(); ++i) {
+    int owner;
+    //Check first and last row to update king or queen
+    for(int i = 0; i < board.size(); i+=(get_size()-1)) {
         for(int j = 0; j < board[i].size(); ++j) {
             square = get_square(make_pair(i, j));
-            p = player(square);
+            owner = player(square);
             for(int i = 0; i < NUM_CHECKERS; ++i) {
-                if(checkers[i].square == square && p != type) {
-                    checkers[i].eat_checker();
+                pair<int, int> coords = get_coordinates(square);
+                if(coords.first == (get_size()-1) && type == COMPUTER) {
+                    mark_king(coords, type);
+                    checkers[i].king = true;
+                }
+                if(coords.first == 0 && type != COMPUTER) {
+                    mark_king(coords, type);
+                    checkers[i].king = true;
                 }
             }
+        }
+    }
+    //If any checkers square does not align with board eat it
+    for(int i = 0; i < NUM_CHECKERS; ++i) {
+        if(checkers[i].square == -1) continue;
+        owner = player(checkers[i].square);
+        if(owner != type) {
+            cout << "Eating checker " << i << " type " << type << endl;
+            checkers[i].eat_checker();
         }
     }
 }
@@ -73,19 +98,28 @@ void Player::update_checkers() {
 //This is really for the computer
 //We just enter in coordinates then move piece
 void Player::move_checker() {
-    int square = 0;
-    int piece;
+    pair<int, int> coords;
+    vector<pair<pair<int, int>, int> > moves_weights;
+    pair<pair<int, int>, int> best_move(make_pair(make_pair(-1, -1), -1));
     int checker = 0;
-    pair<int, int> cur_coordinates = get_coordinates(checker);
-    pair<GLfloat, GLfloat> new_center = get_center(square);
     for(int i = 0; i < NUM_CHECKERS; ++i) {
-        if (checkers[i].square == square) {
-            checker = i;
+        if(checkers[i].square == -1) continue;
+        coords = get_coordinates(checkers[i].square);
+        moves_weights = possible_moves_weights(get_board(), coords.second, coords.first, checkers[i].white, checkers[i].king);
+        for(int j = 0; j < moves_weights.size(); ++j) {
+            if(moves_weights[j].second >= best_move.second) {
+                best_move = moves_weights[j];
+                checker = i;
+            }
         }
     }
-    pair<int, int> new_coordinates = get_coordinates(square);
-    checkers[checker].move_checker(new_center, square);
-    update_board(cur_coordinates, new_coordinates, checkers[checker].white);
+    int new_square = get_square(best_move.first);
+    cout << "Moving " << checker << " to square " << new_square << endl; 
+    pair<int, int> old_coords = get_coordinates(checkers[checker].square);
+    pair<GLfloat, GLfloat> new_center = get_center(new_square);
+    checkers[checker].move_checker(make_pair(new_center.first, new_center.second), new_square);
+    pair<int, int> new_coords = get_coordinates(new_square);
+    update_board(old_coords, new_coords, new_square);
 }
 
 //Select a checker piece
@@ -93,7 +127,6 @@ void Player::move_checker() {
 void Player::select_square(double xpos, double ypos) {
     //Calculate what square this is
     int square = get_square(xpos, ypos);
-    cout << "Clicked square " << square << endl; 
     //Color checker if it is in square selected
     //  It is blue
     //  It is alive
@@ -109,7 +142,6 @@ void Player::select_square(double xpos, double ypos) {
     //Potentially move checker to new square
     if(checker == -1 && selected_checker != -1) {
         pair<int, int> cur_coordinates = get_coordinates(get_selected_checker_square());
-        cout << checkers[selected_checker].white << " " << checkers[selected_checker].king << endl;
         vector<pair<int, int> > possible_moves = whereCanPieceMove(get_board(),
                                                           cur_coordinates.second,
                                                           cur_coordinates.first,
@@ -118,11 +150,24 @@ void Player::select_square(double xpos, double ypos) {
         pair<int, int> new_coordinates = get_coordinates(square);
         for(int i = 0; i < possible_moves.size(); ++i) {
             if(new_coordinates.first == possible_moves[i].second && new_coordinates.second == possible_moves[i].first) {
+                cout << " Moving square " << endl;
                 pair<GLfloat, GLfloat> new_center = get_center(square);
                 checkers[selected_checker].move_checker(new_center, square);
                 update_board(cur_coordinates, new_coordinates, checkers[selected_checker].white);
                 //Must update board too
-                //selected_checker = -1;
+                vector<pair<int, int> > more_moves = additional_moves(get_board(), new_coordinates.second, new_coordinates.first, checkers[selected_checker].white, checkers[selected_checker].king);
+                while(more_moves.size() > 0) {
+                    square = get_square(more_moves[i]);
+                    new_center = get_center(square);
+                    checkers[selected_checker].move_checker(new_center, square);
+                    cur_coordinates = new_coordinates;
+                    new_coordinates = get_coordinates(square);
+                    update_board(cur_coordinates, new_coordinates, checkers[selected_checker].white);
+                    //Must update board too
+                    more_moves = additional_moves(get_board(), new_coordinates.second, new_coordinates.first, checkers[selected_checker].white, checkers[selected_checker].king);
+                }
+                turn = false;
+                selected_checker = -1;
                 break;
             }
         }
@@ -158,6 +203,10 @@ vector<GLfloat> Player::get_checker_colors() {
 int Player::get_selected_checker_square() {
     if(selected_checker == -1) return selected_checker;
     return checkers[selected_checker].square; 
+}
+
+bool Player::get_turn() {
+    return turn; 
 }
 
 void Player::print_checker_squares() {

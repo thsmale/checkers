@@ -26,12 +26,13 @@ using namespace std;
 #define WIN_WIDTH 1024
 #define WIN_HEIGHT 768
 
+//Must be "human_player" because extern Player human object in board
 enum board_properties : char {
     blank = '_',
-    player = 'x',
+    human_player = 'x',
     computer = 'o',
-    player_capital = 'X',
-    computer_captial = 'O'
+    human_king = 'X',
+    computer_king = 'O'
 };
 
 class Board {
@@ -64,10 +65,12 @@ public:
     int get_square(GLfloat, GLfloat);
     int get_square(double, double);
     int get_square(std::pair<int, int>);
-    std::pair<int, int> get_coordinates(int);
-    std::pair<GLfloat, GLfloat> get_center(int); 
+    pair<int, int> get_coordinates(int);
+    pair<GLfloat, GLfloat> get_center(int);
     bool valid_move(int, bool, bool);
-    bool player(int);
+    int player(int);
+    bool is_king(int);
+    void mark_king(pair<int, int>, int); 
     //Print functions
     void print_board(); 
     void print_board_vertices();

@@ -177,7 +177,7 @@ void Board::set_board() {
                 if (i < 3)
                     piece = board_properties::computer;
                 else
-                    piece = board_properties::player;
+                    piece = board_properties::human_player;
                 if(i % 2 == 0) {
                     //Even row
                     if(j % 2 == 0) {
@@ -207,7 +207,7 @@ void Board::update_board(pair<int, int> cur_coords, pair<int, int> new_coords, b
     if(color == true) {
         board[new_coords.first][new_coords.second] = board_properties::computer;
     }else {
-        board[new_coords.first][new_coords.second] = board_properties::player;
+        board[new_coords.first][new_coords.second] = board_properties::human_player;
     }
 }
 
@@ -299,6 +299,7 @@ int Board::get_colors_size() {
     return colors_size;
 }
 
+//Given center coordinates of checker return what square it is 
 int Board::get_square(GLfloat x, GLfloat y) {
     GLfloat xstart = -1.f, xend = -1.f;
     GLfloat ycieling = 1.f, yfloor = 1.f;
@@ -368,7 +369,6 @@ std::pair<int, int> Board::get_coordinates(int square) {
 }
 
 pair<GLfloat, GLfloat> Board::get_center(int square) {
-    cout << "Calc center of square " << square << endl;
     GLfloat center_x = -1.f+(width/2.f), center_y = 1.f-(width/2.f);
     for(int i = 0; i < num_squares(); ++i) {
         if(i % size == 0 && i != 0) {
@@ -390,7 +390,7 @@ bool Board::valid_move(int square, bool white, bool king) {
     int row = int(square/size);
     int col = square % size;
     bool player;
-    if(board[row][col] == board_properties::player) {
+    if(board[row][col] == board_properties::human_player) {
         player = true;
     }else {
         player = false;
@@ -406,13 +406,39 @@ bool Board::valid_move(int square, bool white, bool king) {
 
 //Given a square return which player controls that square
 //0 is computer, 1 is human
-bool Board::player(int square) {
+//-1 is blank
+int Board::player(int square) {
     pair<int, int> coords = get_coordinates(square);
     char piece = board[coords.first][coords.second];
-    if(piece == board_properties::computer || piece == board_properties::computer_captial) {
-        return false;
+    if(piece == board_properties::computer || piece == board_properties::computer_king) {
+        return 0;
     }
-    return true;
+    if(piece == board_properties::human_player || piece == board_properties::human_king) {
+        return 1;
+    }
+    return -1;
+}
+
+//Assumes we know the type of player
+bool Board::is_king(int square) {
+    pair<int, int> coords = get_coordinates(square);
+    char piece = board[coords.first][coords.second];
+    if(piece == board_properties::computer_king || piece == board_properties::human_king) {
+        return true;
+    }
+    return false;
+}
+
+//0 computer, 1 human
+void Board::mark_king(pair<int, int> coords, int type) {
+    char piece;
+    if(type == 0) {
+        piece = board_properties::computer_king;
+    }else {
+        piece = board_properties::human_king;
+    }
+    board[coords.first][coords.second] = piece;
+
 }
 
 int Board::num_vertices() {
