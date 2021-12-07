@@ -16,55 +16,6 @@ Board::Board() : size(8) {
     this->colors = new GLfloat[colors_size];
     this->width = 1.0 / (size / 2.0);
     GLfloat width = 1.0 / (size / 2.0);
-    
-    /*
-    //Initialize board_vertices 
-    GLfloat height = width;
-    GLfloat x = -1.0f;
-    GLfloat y = 1.0f;
-    //Set top triangles
-    int i = 0;
-    for(int rows = 0; rows < size; rows++) {
-        for(int cols = 0; cols < size; cols++) {
-            board_vertices[i] = x;
-            board_vertices[i+1] = y;
-            x += width;
-            board_vertices[i+2] = x;
-            board_vertices[i+3] = y;
-            board_vertices[i+4] = x;
-            board_vertices[i+5] = y-width;
-            i += 6;
-        }
-        x = -1.0f; //Reset x to far left
-        y = y-height; //Shift y down
-    }
-     
-    //Set bottom triangles
-    x = -1.0f;
-    y = 1.0f;
-    for(int rows = 0; rows < size; rows++) {
-        for(int cols = 0; cols < size; cols++) {
-            //Top left
-            board_vertices[i] = x;
-            board_vertices[i+1] = y;
-            //Bottom left
-            board_vertices[i+2] = x;
-            board_vertices[i+3] = y-width;
-            //Bottom right
-            x += width;
-            board_vertices[i+4] = x;
-            board_vertices[i+5] = y-width;
-            i += 6;
-        }
-        x = -1.0f; //Reset x to far left
-        y = y-height; //Shift y down
-    }
-    
-    //Initialize colors
-    for(int i = 0; i < colors_size; ++i)
-        colors[i] = 0.0f;
-    
-     */
     red = 1.0f;
     green = 1.0f;
     blue = 1.0f;

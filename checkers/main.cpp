@@ -28,9 +28,8 @@
 #include "moves.hpp"
 #include "additionalMoves.hpp"
 #include <SOIL2/SOIL2.h>
+#include "abp.hpp"
 using namespace std;
-
-static bool human_turn = true;
 
 //Human is object is extern so we can access it via this call back function
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -98,8 +97,7 @@ int main() {
     vector<vector<char> > board_layout = board.get_board();
     vector<pair<int, int> > possible_moves;
     int cur_x = -1, cur_y = -1;
-     
-
+    ABP Algo;
      
     // Create and compile our GLSL program from the shaders
     GLuint shader = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
@@ -109,6 +107,7 @@ int main() {
     // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
+    
     
     
     
@@ -135,7 +134,6 @@ int main() {
         coordinates = board.get_coordinates(human.get_selected_checker_square());
         //Need to separate clicking square to see moves and actually moving a piece
         if(coordinates.first != cur_x || coordinates.second != cur_y) {
-            computer.update_checkers(); 
             cur_x = coordinates.first;
             cur_y = coordinates.second;
             //If cur_x && cur_y == -1 then we just moved a square
@@ -150,7 +148,7 @@ int main() {
             if(possible_moves.size() > 0) {
                 board.color_possible_moves(possible_moves);
             }
-
+            board.print_board();
             color_buffer_data = board.get_colors();
             glBufferData(GL_ARRAY_BUFFER, board.get_colors_size() * sizeof(*color_buffer_data), color_buffer_data, GL_STATIC_DRAW);
         }
@@ -166,9 +164,58 @@ int main() {
         glEnableVertexAttribArray(2);
         glBindBuffer(GL_ARRAY_BUFFER, computer_vbo);
         if(!human.get_turn()) {
-            cout << "Computer turn" << endl; 
             computer.update_checkers();
-            computer.move_checker();
+            board.print_board();
+            // Alpha-Beta Pruning min max implementation
+            Checker* chosen_checker;
+            vector<std::pair<std::pair<int, int>, int> > chosen_moves;
+            int maxEval = 0;
+
+            vector<Checker*> checkers_ref = computer.get_checkers();
+
+            for (Checker* checker : checkers_ref) {
+                pair<int, int> coords = board.get_coordinates(checker->square);
+                vector<std::pair<std::pair<int, int>, int> > moves = possible_moves_weights(board.get_board(), coords.second, coords.first, checker->white, checker->king);
+
+                if (moves.size() > 0) {
+                    int eval = Algo.minmax(board, checker->square, Algo.getHighestScore(moves), INT_MIN, INT_MAX, true, checker->king);
+
+                    if (eval > maxEval) {
+                        maxEval = eval;
+                        chosen_checker = checker;
+                        chosen_moves = moves;
+                    }
+                }
+            }
+            
+            if (chosen_checker != nullptr) { // just in case (for now?)
+                cout << "we have chosen the checker from square " << chosen_checker->square << " to be moved" << endl;
+                std::pair<int, int> optimal_move;
+                int highest = 0;
+
+                for (std::pair<std::pair<int, int>, int> move : chosen_moves) {
+                    if (move.second > highest) {
+                        highest = move.second;
+                        optimal_move = move.first;
+                    }
+                }
+
+                int old_new_square = board.get_square(optimal_move);
+                computer.move_checker(chosen_checker->square, old_new_square);
+
+                /*
+                // convert from (col, row) to (row, col)
+                int row = optimal_move.second;
+                optimal_move.second = optimal_move.first;
+                optimal_move.first = row;
+
+                //int new_square = board.get_square(optimal_move); // this is the "converted" square (from (col, row) to (row, col))
+                board.update_board(board.get_coordinates(chosen_checker->square), optimal_move, true);
+
+                chosen_checker->square = old_new_square; // assuming this will need to be replaced so enemy checkers can be taken out
+                 */
+                cout << "checker successfully moved to square " << chosen_checker->square << endl;
+            }
             computer_buffer_data = computer.get_checker_vertices();
             glBufferData(GL_ARRAY_BUFFER, computer_buffer_data.size() * sizeof(GLfloat), &computer_buffer_data[0], GL_STATIC_DRAW);
             human.set_turn();

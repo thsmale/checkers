@@ -71,6 +71,8 @@ add_executable(checkers
 	checkers/additionalMoves.cpp 
 	checkers/movesEvaluated.cpp
 	checkers/movesEvaluated.hpp
+	checkers/abp.cpp
+	checkers/abp.hpp
 	common/shader.cpp
 	common/shader.hpp
 
