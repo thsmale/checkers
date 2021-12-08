@@ -48,7 +48,8 @@ public:
     void color_possible_moves(vector<pair<int, int> >);
     //Setters
     void set_board();
-    void update_board(pair<int, int>, pair<int, int>, int); 
+    void set_colors(); 
+    void update_board(pair<int, int>, pair<int, int>); 
     void set_board_vertices();
     void set_elements();
     void set_color();
@@ -75,7 +76,7 @@ public:
     bool valid_move(int, bool, bool);
     int player(int);
     bool is_king(int);
-    void mark_king(pair<int, int>, int); 
+    void mark_king(pair<int, int>); 
     //Print functions
     void print_board(); 
     void print_board_vertices();
@@ -90,7 +91,7 @@ private:
     int colors_size;
     static std::vector<std::vector<char> > board;
     GLfloat *board_vertices;
-    GLfloat *colors;
+    static GLfloat *colors;
     GLfloat red;
     GLfloat green;
     GLfloat blue;

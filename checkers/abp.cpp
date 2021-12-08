@@ -51,3 +51,49 @@ int ABP::getHighestScore(std::vector<std::pair<std::pair<int, int>, int> > moves
 
     return highest;
 }
+
+//Returns old square, new square
+//In case all moves are equal, choose highest checker number
+std::pair<int, int> ABP::optimal_move(Board &board, vector<Checker*> checkers) {
+    cout << "Choose checker" << endl;
+    Checker *chosen_checker = nullptr;
+    int maxEval = INT_MIN;
+    vector<std::pair<std::pair<int, int>, int> > chosen_moves;
+    for (int i = 0; i < checkers.size(); ++i) {
+        if(checkers[i]->square < 0 || checkers[i]->square > (board.num_squares()-1)) {
+            cerr << "Checker square is -1" << endl; 
+        }
+        pair<int, int> coords = board.get_coordinates(checkers[i]->square);
+        vector<std::pair<std::pair<int, int>, int> > moves = possible_moves_weights(board.get_board(),
+                                                                                    coords.second,
+                                                                                    coords.first,
+                                                                                    checkers[i]->white,
+                                                                                    checkers[i]->king);
+
+        if (moves.size() > 0) {
+            cout << "Calc moves for square " << checkers[i]->square << endl;
+            int eval = minmax(board, checkers[i]->square, getHighestScore(moves), INT_MIN, INT_MAX, true, checkers[i]->king);
+            cout << eval << endl;
+            if (eval >= maxEval) {
+                maxEval = eval;
+                chosen_checker = checkers[i];
+                chosen_moves = moves;
+                cout << '\t' << chosen_checker->square << endl;
+            }
+        }
+    }
+    
+    //cout << "AI chooses to move checker from square " << chosen_checker->square << endl;
+    std::pair<int, int> optimal_move;
+    int highest = 0;
+
+    for (std::pair<std::pair<int, int>, int> move : chosen_moves) {
+        if (move.second > highest) {
+            highest = move.second;
+            optimal_move = move.first;
+        }
+    }
+    cout << "Choose " << chosen_checker->square << endl;
+    return make_pair(chosen_checker->square, board.get_square(make_pair(optimal_move.second, optimal_move.first)));
+    
+}

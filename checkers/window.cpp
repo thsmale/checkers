@@ -45,6 +45,13 @@ Window::Window() {
 }
 
 Window::~Window() {
+    glDeleteBuffers(1, &board_vbo);
+    glDeleteBuffers(1, &board_colors_vbo);
+    glDeleteBuffers(1, &computer_colors_vbo);
+    glDeleteBuffers(1, &computer_vbo);
+    glDeleteBuffers(1, &human_vbo);
+    glDeleteBuffers(1, &human_colors_vbo); 
+    glDeleteVertexArrays(1, &vao);
     glfwTerminate();
 }
 
@@ -101,10 +108,7 @@ void Window::set_computer_colors_vbo(vector<GLfloat> vertices) {
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_DYNAMIC_DRAW);
 }
 
-void Window::draw_board(Board &board) {
-    // 1st attribute buffer : board_vertices
-    //glUseProgram(computer_shader);
-    /*
+void Window::draw_board(int board_size, GLfloat *colors, int colors_size) {
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, board_vbo);
     //Layout in shader, dimensions, type, normalized?, stride, offset
@@ -113,35 +117,32 @@ void Window::draw_board(Board &board) {
     glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, board_colors_vbo);
     //Board color buffer is called if we select a new checker or move checker piece
-    glBufferData(GL_ARRAY_BUFFER, board.get_board_vertices_size() * sizeof(GLfloat), board.get_board_vertices(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, colors_size * sizeof(*colors), colors, GL_DYNAMIC_DRAW);
     //1st parameter must match the layout in the shader
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glDrawArrays(GL_TRIANGLES, 0, board.get_board_vertices_size());
+    glDrawArrays(GL_TRIANGLES, 0, board_size);
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
-     */
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, board_vbo);
+}
+
+void Window::draw_human_checkers(vector<GLfloat> vertices) {
+    glGenBuffers(1, &human_vbo);
+    glEnableVertexAttribArray(3);
+    glBindBuffer(GL_ARRAY_BUFFER, human_vbo);
     //Layout in shader, dimensions, type, normalized?, stride, offset
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    // 2nd attribute buffer : board_colors
-    glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, board_colors_vbo);
-    //Board color buffer is called if we select a new checker or move checker piece
-    GLfloat *color_buffer_data = board.get_colors();
-    glBufferData(GL_ARRAY_BUFFER, board.get_colors_size() * sizeof(*color_buffer_data), color_buffer_data, GL_DYNAMIC_DRAW);
-    //1st parameter must match the layout in the shader
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glDrawArrays(GL_TRIANGLES, 0, board.get_board_vertices_size());
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_DYNAMIC_DRAW);
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+    glDisableVertexAttribArray(3);
 }
 
 void Window::draw_human_checkers(vector<GLfloat> vertices, vector<GLfloat> colors) {
     glEnableVertexAttribArray(3);
     glBindBuffer(GL_ARRAY_BUFFER, human_vbo);
     //Layout in shader, dimensions, type, normalized?, stride, offset
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_DYNAMIC_DRAW);
     glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    
     glEnableVertexAttribArray(4);
     glBindBuffer(GL_ARRAY_BUFFER, human_colors_vbo);
     glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(GLfloat), &colors[0], GL_DYNAMIC_DRAW);
@@ -153,6 +154,7 @@ void Window::draw_human_checkers(vector<GLfloat> vertices, vector<GLfloat> color
 }
 
 void Window::draw_computer_checkers(vector<GLfloat> vertices) {
+    glGenBuffers(1, &computer_vbo);
     glEnableVertexAttribArray(2);
     glBindBuffer(GL_ARRAY_BUFFER, computer_vbo);
     //Layout in shader, dimensions, type, normalized?, stride, offset

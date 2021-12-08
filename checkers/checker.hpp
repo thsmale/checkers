@@ -29,7 +29,7 @@ struct Checker: protected Board {
     vector<GLfloat> colors; 
     int square;
     bool white; 
-    bool capture;
+    bool alive;
     bool king;
 };
 #endif /* checker_hpp */

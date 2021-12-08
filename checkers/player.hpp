@@ -26,13 +26,15 @@ public:
     void set_turn(); 
     void update_checkers();
     void move_checker(int, int); 
-    void select_square(double, double);
+    bool select_square(double, double);
     void print_checker_squares(); 
     vector<GLfloat> get_checker_vertices();
     vector<GLfloat> get_checker_colors();
     int get_selected_checker_square();
-    bool get_turn(); 
+    bool get_turn();
+    void eat_all_checkers(); 
     void print_checker_vertices();
+    void print_checker_colors(); 
     vector<Checker*> get_checkers();
 private:
     Checker checkers[NUM_CHECKERS];

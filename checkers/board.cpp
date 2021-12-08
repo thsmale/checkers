@@ -7,13 +7,13 @@
 
 #include "board.hpp"
 
-vector<vector<char> > Board::board; 
+vector<vector<char> > Board::board;
+GLfloat *Board::colors;
 
 Board::Board() : size(8) {
     this->board_vertices_size = (size*size) * 6 * 2;
     this->colors_size = (size*size) * 6 * 3;
     this->board_vertices = new GLfloat[board_vertices_size];
-    this->colors = new GLfloat[colors_size];
     this->width = 1.0 / (size / 2.0);
     GLfloat width = 1.0 / (size / 2.0);
     red = 1.0f;
@@ -24,7 +24,6 @@ Board::Board() : size(8) {
 //Do I need to delete every element in the array?
 Board::~Board() {
     delete [] board_vertices;
-    delete [] colors;
 }
 
 //MARK: Coloring
@@ -152,25 +151,21 @@ void Board::set_board() {
     //Set player positions
 }
 
-//true if computer false if human
+void Board::set_colors() {
+    this->colors = new GLfloat[colors_size];
+    for(int i = 0; i < colors_size; ++i) {
+        colors[i] = 1.f; 
+    }
+}
+
 //Set all pieces in path to blank
 //Would need to rely on update_checkers to set to king
-void Board::update_board(pair<int, int> cur_coords, pair<int, int> new_coords, int player) {
+void Board::update_board(pair<int, int> cur_coords, pair<int, int> new_coords) {
     //Set old and new square
+    char old_piece = board[cur_coords.first][cur_coords.second];
     board[cur_coords.first][cur_coords.second] = board_properties::blank;
-    if(player == COMPUTER) {
-        board[new_coords.first][new_coords.second] = board_properties::computer;
-    }else {
-        board[new_coords.first][new_coords.second] = board_properties::human_player;
-    }
+    board[new_coords.first][new_coords.second] = old_piece;
     //Set everything in between to blank
-    /*
-    cout << "Update the fucking board holy fuck " << endl;
-    cout << "Coords " << endl;
-    cout << cur_coords.first << " " << cur_coords.second << "\t" << new_coords.first << " " << new_coords.second << endl; 
-    cout << " Squares " << endl;
-    cout << get_square(cur_coords) << " " << get_square(new_coords) <<  endl;
-     */
     if(get_path_length(get_square(cur_coords), get_square(new_coords)) > 1) {
         vector<int> path = get_path(get_square(cur_coords), get_square(new_coords));
         pair<int, int> coords;
@@ -319,6 +314,14 @@ int Board::get_square(double x, double y) {
 
 //Only accepts row, col coordinates
 int Board::get_square(std::pair<int, int> coordinates) {
+    if(coordinates.first < 0 || coordinates.first >= size) {
+        cerr << "Invalid coordinate passed to get_square" << endl;
+        while(1);
+    }
+    if(coordinates.second < 0 || coordinates.second >= size) {
+        cerr << "Invalid coordinate passed to get_square" << endl;
+        while(1);
+    }
     int row = coordinates.first * size;
     int col = coordinates.second;
     return (row+col); 
@@ -451,16 +454,18 @@ bool Board::is_king(int square) {
     return false;
 }
 
-//0 computer, 1 human
-void Board::mark_king(pair<int, int> coords, int type) {
-    char piece;
-    if(type == COMPUTER) {
+//Ensure this function only works for squares that are not kings already
+void Board::mark_king(pair<int, int> coords) {
+    char piece = board[coords.first][coords.second];
+    if(piece == board_properties::computer) {
         piece = board_properties::computer_king;
-    }else {
+    }else if(piece == board_properties::human_player) {
         piece = board_properties::human_king;
+    }else {
+        cerr << "Err you shouldn't be marking square " << get_square(coords) << " as king " << endl;
+        return;
     }
     board[coords.first][coords.second] = piece;
-
 }
 
 int Board::num_vertices() {

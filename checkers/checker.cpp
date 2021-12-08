@@ -10,7 +10,7 @@
 Checker::Checker() {
     radius = width/2;
     square = 0;
-    capture = false; 
+    alive = true; 
 }
 
 void Checker::set_checker(GLfloat x, GLfloat y, int square) {
@@ -41,6 +41,10 @@ void Checker::set_checker(GLfloat x, GLfloat y, int square) {
 //Move the selected checker to the desired square
 //Next need to check if it takes out any pieces along the way
 void Checker::move_checker(pair<GLfloat, GLfloat> center, int square) {
+    if (square < 0 || square > (num_squares()-1)) {
+        cerr << "Cannot move checker to that square " << endl;
+        exit(1);
+    }
     GLfloat x = center.first;
     GLfloat y = center.second;
     vertices.clear();
@@ -82,7 +86,7 @@ void Checker::color(GLfloat r, GLfloat g, GLfloat b) {
 void Checker::eat_checker() {
     vertices.clear();
     colors.clear();
-    capture = true;
+    alive = false;
     square = -1;
     king = false; 
 }

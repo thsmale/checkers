@@ -47,8 +47,6 @@ std::pair<int, int> ediblePiece(std::vector<std::vector<char> > board, int curX,
   return std::make_pair(x_avg, y_avg);
 }
 
-
-
 std::vector<std::pair<int,int> > whereCanPieceMove(std::vector<std::vector<char> > board, int x, int y, bool isWhite, bool isKing){
   //this algorithm is assuming that the white pieces are moving from
   //the top of the board down.

@@ -38,7 +38,9 @@ public:
     void set_human_colors_vbo(vector<GLfloat>);
     void set_computer_vbo(vector<GLfloat>);
     void set_computer_colors_vbo(vector<GLfloat>);
-    void draw_board(Board &board);
+    void draw(vector<GLfloat>, vector<GLfloat>); 
+    void draw_board(int, GLfloat*, int);
+    void draw_human_checkers(vector<GLfloat>); 
     void draw_human_checkers(vector<GLfloat>, vector<GLfloat>);
     void draw_computer_checkers(vector<GLfloat>); 
 private:
