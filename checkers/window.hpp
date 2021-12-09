@@ -34,12 +34,14 @@ public:
     GLuint& get_board_colors_vbo(); 
     void set_board_vbo(GLfloat*, int);
     void set_board_colors_vbo(GLfloat*, int);
+    void set_checkers_buffers(vector<GLfloat>, vector<GLfloat>);
     void set_human_vbo(vector<GLfloat>);
     void set_human_colors_vbo(vector<GLfloat>);
     void set_computer_vbo(vector<GLfloat>);
     void set_computer_colors_vbo(vector<GLfloat>);
     void draw(vector<GLfloat>, vector<GLfloat>); 
     void draw_board(int, GLfloat*, int);
+    void draw_checkers(vector<GLfloat> vertices, vector<GLfloat> colors);
     void draw_human_checkers(vector<GLfloat>); 
     void draw_human_checkers(vector<GLfloat>, vector<GLfloat>);
     void draw_computer_checkers(vector<GLfloat>); 
@@ -48,6 +50,8 @@ private:
     GLuint vao; 
     GLuint board_vbo;
     GLuint board_colors_vbo;
+    GLuint checkers_vertices_buffer;
+    GLuint checkers_colors_buffer;
     GLuint human_vbo;
     GLuint human_colors_vbo;
     GLuint computer_vbo;

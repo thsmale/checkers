@@ -3,7 +3,7 @@
 // Input vertex data, different for all executions of this shader.
 // Each vertex can have numerous attributes like colors, or textures
 // This location identifies which vertex we are referring too
-layout(location = 2) in vec2 computer_vertices;
+layout(location = 4) in vec2 computer_vertices;
 
 void main(){
 

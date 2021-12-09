@@ -82,6 +82,8 @@ add_executable(checkers
 	checkers/player.vertexshader
 	checkers/computer.fragmentshader
 	checkers/computer.vertexshader
+	checkers/checkers.fragmentshader
+	checkers/checkers.vertexshader
 )
 target_link_libraries(checkers
 	${ALL_LIBS}

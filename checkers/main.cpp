@@ -59,6 +59,7 @@ int main() {
     GLuint board_shader = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
     GLuint computer_shader = LoadShaders( "computer.vertexshader", "computer.fragmentshader" );
     GLuint human_shader = LoadShaders( "player.vertexshader", "player.fragmentshader" );
+    //GLuint checkers_shader = LoadShaders( "checkers.vertexshader", "checkers.fragmentshader" );
 
     //Vertex array object
     //Stores links between the vbo and its attributes
@@ -70,51 +71,31 @@ int main() {
     Board board;
     board.set_board_vertices();
     w.set_board_vbo(board.get_board_vertices(), board.get_board_vertices_size());
-    GLuint board_vbo = w.get_board_vbo();
-    
     board.set_colors();
     board.color_squares();
     w.set_board_colors_vbo(board.get_colors(), board.get_colors_size());
-    GLuint board_colors_vbo = w.get_board_colors_vbo();
     
-    Player computer(0);
+    Player computer(COMPUTER);
     computer.set_checkers();
     w.set_computer_vbo(computer.get_checker_vertices());
     
     human.set_checkers();
     w.set_human_vbo(human.get_checker_vertices());
-    //w.set_human_colors_vbo(human.get_checker_colors());
     
     board.set_board();
-    pair<int, int> coordinates;
-    vector<vector<char> > board_layout = board.get_board();
-    vector<pair<int, int> > possible_moves;
-    int cur_x = -1, cur_y = -1;
     ABP abp;
+    int turn = HUMAN;
+    Player *temp;
      
     // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
-    
-    int turn = HUMAN;
-    Player *temp;
     
     // Check if the ESC key was pressed or the window was closed
     // Closed event loops, only handle events when you need to
     while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
           glfwWindowShouldClose(window) == 0 ) {
         //Highlight selected checker if there is one
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
-        glUseProgram(board_shader);
-        w.draw_board(board.get_board_vertices_size(), board.get_colors(), board.get_colors_size());
-
-        glUseProgram(computer_shader);
-        w.draw_computer_checkers(computer.get_checker_vertices());
-        
-        glUseProgram(human_shader);
-        w.draw_human_checkers(human.get_checker_vertices());
-        
         if(go) {
             string player;
             if(turn == HUMAN) {
@@ -145,19 +126,34 @@ int main() {
                 turn = HUMAN;
             }
             go = false;
+            
+            //w.set_checkers_buffers(human.get_checker_vertices(), human.get_checker_colors());
+
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            
+            glUseProgram(board_shader);
+            w.draw_board(board.get_board_vertices_size(), board.get_colors(), board.get_colors_size());
+
+            glUseProgram(computer_shader);
+            w.draw_computer_checkers(computer.get_checker_vertices());
+            //computer.get_checker_colors());
+            
+            glUseProgram(human_shader);
+            w.draw_human_checkers(human.get_checker_vertices());
+            
+            glfwSwapBuffers(window);
+        
 
         }
-
-        glfwSwapBuffers(window);
         glfwPollEvents();
     }
     
-    /*
     // save a screenshot of your awesome OpenGL game engine, running at 1024x768
+    /*
     int save_result = SOIL_save_screenshot
         (
-            "/Users/tommysmale/classroom/csci580/projects/ogl/checkers/checker.bmp",
-            SOIL_SAVE_TYPE_BMP,
+            "/Users/tommysmale/classroom/csci580/projects/ogl/checkers/game.gif",
+            SOIL_SAVE_TYPE_GIF,
             0, 0, 2048, 1536
         );
     if(save_result == 1) {
