@@ -95,6 +95,17 @@ int main() {
     // Closed event loops, only handle events when you need to
     while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
           glfwWindowShouldClose(window) == 0 ) {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        glUseProgram(board_shader);
+        w.draw_board(board.get_board_vertices_size(), board.get_colors(), board.get_colors_size());
+
+        glUseProgram(computer_shader);
+        w.draw_computer_checkers(computer.get_checker_vertices());
+        //computer.get_checker_colors());
+        
+        glUseProgram(human_shader);
+        w.draw_human_checkers(human.get_checker_vertices());
         //Highlight selected checker if there is one
         if(go) {
             string player;
@@ -149,11 +160,11 @@ int main() {
     }
     
     // save a screenshot of your awesome OpenGL game engine, running at 1024x768
-    /*
+    
     int save_result = SOIL_save_screenshot
         (
-            "/Users/tommysmale/classroom/csci580/projects/ogl/checkers/game.gif",
-            SOIL_SAVE_TYPE_GIF,
+            "/Users/tommysmale/classroom/csci580/projects/ogl/checkers/board_state.bmp",
+            SOIL_SAVE_TYPE_BMP,
             0, 0, 2048, 1536
         );
     if(save_result == 1) {
@@ -161,7 +172,7 @@ int main() {
     }else {
         cerr << "Save file unsuccessful" << endl;
     }
-     */
+     
      
     
     // Cleanup VBO
